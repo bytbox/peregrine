@@ -3,11 +3,17 @@
 
 package main
 
+import (
+	"github.com/bytbox/waitmap.go"
+)
+
 var (
 	exit     = make(chan interface{})
 	actions  = make(chan Action)
 	input    = make(chan interface{})
 	requests = make(chan string) // Resource requests
+
+	resources = waitmap.New()
 )
 
 func HandleActions() {

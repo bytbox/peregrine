@@ -39,4 +39,7 @@ func Navigate(dest string) NavigateAction {
 func (a NavigateAction) Do() {
 	// We send the resource request, and then initiate the renderer.
 	requests <- a.dest
+
+	// Now navigate to the page.
+	
 }
