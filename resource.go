@@ -6,9 +6,31 @@ import (
 	"net/url"
 )
 
+func Fetcher() {
+	for {
+		select {
+		case req := <-requests:
+			res, err := Access(req)
+			if err != nil {
+				panic(err)
+			}
+			println(string(res.Data))
+		}
+	}
+}
+
+type Resource struct {
+	Data []byte
+	Meta map[string]string
+}
+
+func RawResource(bs []byte) *Resource {
+	return &Resource{bs, make(map[string]string)}
+}
+
 // Accessors are expected to be thread-safe.
 type Accessor interface {
-	Access(string) ([]byte, error)
+	Access(string) (*Resource, error)
 }
 
 // An HTTPAccessor can be used as a regular accessor, but can also make more
@@ -18,10 +40,10 @@ type HTTPAccessor interface {
 }
 
 type BasicAccessor struct {
-	Get func(string) ([]byte, error)
+	Get func(string) (*Resource, error)
 }
 
-func (b BasicAccessor) Access(url string) ([]byte, error) {
+func (b BasicAccessor) Access(url string) (*Resource, error) {
 	return b.Get(url)
 }
 
@@ -36,7 +58,7 @@ func init() {
 	}
 }
 
-func Access(urlstr string) ([]byte, error) {
+func Access(urlstr string) (*Resource, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
@@ -48,14 +70,17 @@ func Access(urlstr string) ([]byte, error) {
 	return a.Access(urlstr)
 }
 
-func aboutAccess(urlstr string) ([]byte, error) {
-	return nil, errors.New("not yet implemented")
+func aboutAccess(urlstr string) (*Resource, error) {
+	_, err := url.Parse(urlstr)
+	if err != nil { return nil, err }
+	return RawResource([]byte("Not yet implemented.")), nil
 }
 
-func fileAccess(urlstr string) ([]byte, error) {
+func fileAccess(urlstr string) (*Resource, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
 		return nil, err
 	}
-	return ioutil.ReadFile(u.Path)
+	bs, err := ioutil.ReadFile(u.Path)
+	return RawResource(bs), err
 }

@@ -1,3 +1,5 @@
+// User-initiated action descriptions. This code is part of the browser core.
+
 package main
 
 type Action interface {
@@ -35,5 +37,6 @@ func Navigate(dest string) NavigateAction {
 }
 
 func (a NavigateAction) Do() {
-
+	// We send the resource request, and then initiate the renderer.
+	requests <- a.dest
 }

@@ -38,11 +38,11 @@ func main() {
 		return
 	}
 
-	GUIMain()
+	go GUIMain()
+	go Fetcher()
 	go HandleActions()
 
 	actions <- Navigate(url)
-	actions <- Simple(ExitAction)
 
 	<-exit
 }
