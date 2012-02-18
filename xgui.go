@@ -16,6 +16,7 @@ var (
 	xC   *xgb.Conn
 	xWin xgb.Id
 	xGc  xgb.Id
+	xGeo *xgb.GetGeometryReply
 
 	lastMouse xgb.Point
 )
@@ -58,35 +59,29 @@ func GUIInit() {
 	)
 
 	xC, xWin, xGc = c, win, gc
+
+	xGeo, err = xC.GetGeometry(win)
+	if err != nil { panic(err) }
 }
 
 func GUIEventLoop() {
-	c, win, gc := xC, xWin, xGc
 	for {
-		reply, err := c.WaitForEvent()
+		reply, err := xC.WaitForEvent()
 		if err != nil { panic(err) }
-
-		winGeo, err := c.GetGeometry(win)
-		if err != nil { panic(err) }
-
-		c.ClearArea(false, win, 0, 0, winGeo.Width, winGeo.Height)
 
 		switch event := reply.(type) {
 		case xgb.KeyPressEvent:
 			println("===")
 			println(keymap[event.Detail][0])
-			points := make([]xgb.Point, 2)
-			points[0].X = event.EventX
-			points[0].Y = event.EventY
-			c.PolyLine(xgb.CoordModeOrigin, win, gc, points)
 		case xgb.KeyReleaseEvent:
 		}
 	}
-
-	c.Close()
 }
 
 func GUIRender() {
 	c, win, gc := xC, xWin, xGc
+
+	c.ClearArea(true, win, 0, 0, xGeo.Width, xGeo.Height)
+
 	c.PolyLine(xgb.CoordModeOrigin, win, gc, []xgb.Point{xgb.Point{0, 100}, xgb.Point{100,0}})
 }

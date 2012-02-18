@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	GUI_FPS = 1
+	GUI_FMS = 30. // ms per frame
 )
 
 type Painter interface {
@@ -35,7 +35,7 @@ func GUIMain() {
 }
 
 func GUIRenderLoop() {
-	ticker := time.Tick(1e9/GUI_FPS)
+	ticker := time.Tick(1e6*GUI_FMS)
 	for {
 		GUIRender()
 		<-ticker
