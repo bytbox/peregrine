@@ -32,6 +32,7 @@ func GUIMain() {
 	GUIInit()
 	go GUIRenderLoop()
 	GUIEventLoop()
+	exit <- nil
 }
 
 func GUIRenderLoop() {

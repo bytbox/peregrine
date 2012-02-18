@@ -71,11 +71,20 @@ func GUIEventLoop() {
 
 		switch event := reply.(type) {
 		case xgb.KeyPressEvent:
-			println("===")
-			println(keymap[event.Detail][0])
+			c, _ := getKeyChar(event.Detail, event.State)
+			if c == 'q' && event.State & xgb.KeyButMaskControl != 0 {
+				goto Exit
+			}
 		case xgb.KeyReleaseEvent:
 		}
 	}
+Exit:
+}
+
+func getKeyChar(code byte, mask uint16) (rune, bool) {
+	omask := mask
+	mask &= 0x0003
+	return rune(keymap[code][mask]), (omask & 0xffff-0x0003 == 0)
 }
 
 func GUIRender() {
