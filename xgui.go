@@ -12,7 +12,15 @@ var (
 	keymap = make([][]xgb.Keysym, 256)
 )
 
-func GUIMain() {
+var (
+	xC   *xgb.Conn
+	xWin xgb.Id
+	xGc  xgb.Id
+
+	lastMouse xgb.Point
+)
+
+func GUIInit() {
 	c, err := xgb.Dial(os.Getenv("DISPLAY"))
 	if err != nil {
 		panic(err)
@@ -20,8 +28,6 @@ func GUIMain() {
 
 	kmr, err := c.GetKeyboardMapping(keymapRange[0], keymapRange[1]-keymapRange[0])
 	if err != nil { panic(err) }
-	println(len(kmr.Keysyms))
-	println(kmr.Length)
 	j := 0
 	for i := keymapRange[0]; i < keymapRange[1]; i++ {
 		kss := make([]xgb.Keysym, kmr.KeysymsPerKeycode)
@@ -51,18 +57,23 @@ func GUIMain() {
 		[]uint32{screen.BlackPixel, screen.WhitePixel},
 	)
 
+	xC, xWin, xGc = c, win, gc
+}
+
+func GUIEventLoop() {
+	c, win, gc := xC, xWin, xGc
 	for {
 		reply, err := c.WaitForEvent()
 		if err != nil { panic(err) }
 
 		winGeo, err := c.GetGeometry(win)
 		if err != nil { panic(err) }
-		println(winGeo.Width)
 
 		c.ClearArea(false, win, 0, 0, winGeo.Width, winGeo.Height)
 
 		switch event := reply.(type) {
 		case xgb.KeyPressEvent:
+			println("===")
 			println(keymap[event.Detail][0])
 			points := make([]xgb.Point, 2)
 			points[0].X = event.EventX
@@ -73,4 +84,9 @@ func GUIMain() {
 	}
 
 	c.Close()
+}
+
+func GUIRender() {
+	c, win, gc := xC, xWin, xGc
+	c.PolyLine(xgb.CoordModeOrigin, win, gc, []xgb.Point{xgb.Point{0, 100}, xgb.Point{100,0}})
 }
