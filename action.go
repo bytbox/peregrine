@@ -41,5 +41,5 @@ func (a NavigateAction) Do() {
 	requests <- a.dest
 
 	// Now navigate to the page.
-	
+	GUINavigate(a.dest)
 }

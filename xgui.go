@@ -87,10 +87,16 @@ func getKeyChar(code byte, mask uint16) (rune, bool) {
 	return rune(keymap[code][mask]), (omask & 0xffff-0x0003 == 0)
 }
 
+var (
+	GUIDest string
+)
+
 func GUIRender() {
 	c, win, gc := xC, xWin, xGc
 
 	c.ClearArea(true, win, 0, 0, xGeo.Width, xGeo.Height)
 
 	c.PolyLine(xgb.CoordModeOrigin, win, gc, []xgb.Point{xgb.Point{0, 100}, xgb.Point{100,0}})
+
+	c.ImageText8(win, gc, 50, 50, []byte("Hello, world!"))
 }

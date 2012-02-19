@@ -7,11 +7,13 @@ implemented outside of this file:
 
 	- GUIInit      func()
 	- GUIEventLoop func()
+	- GUIDest      string
 
 The following objects are provided by this file as supplements:
 
 	- GUIMain       func()
 	- GUIRenderLoop func()
+	- GUINavigate   func(string)
 
 */
 
@@ -28,6 +30,10 @@ const (
 type Painter interface {
 }
 
+var (
+	gNavigate = make(chan string)
+)
+
 func GUIMain() {
 	GUIInit()
 	go GUIRenderLoop()
@@ -38,7 +44,15 @@ func GUIMain() {
 func GUIRenderLoop() {
 	ticker := time.Tick(1e6*GUI_FMS)
 	for {
-		GUIRender()
-		<-ticker
+		select {
+		case <-ticker:
+			GUIRender()
+		case dest := <-gNavigate:
+			GUIDest = dest
+		}
 	}
+}
+
+func GUINavigate(d string) {
+	gNavigate <- d
 }
